@@ -14,6 +14,13 @@ with open(model_path, 'rb') as f:
 # create the FastAPI app
 app = FastAPI()
 
+# Define city tiers
+tier_1_cities = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune"]
+tier_2_cities = ["Jaipur", "Chandigarh", "Indore", "Lucknow", "Patna", "Ranchi", "Visakhapatnam", "Coimbatore",
+                "Bhopal", "Nagpur", "Vadodara", "Surat", "Rajkot", "Jodhpur", "Amritsar", "Varanasi",
+                "Agra", "Dehradun", "Mysore", "Guwahati", "Thiruvananthapuram", 
+                "Allahabad", "Aurangabad", "Vijayawada", "Tiruchirappalli", "Gwalior",  "Warangal", "Noida"]
+
 # pydantic model to validate input data
 class UserInput(BaseModel):
     age: Annotated[int, Field(..., ge=0, lt=120, description="Age of the person")]
@@ -54,4 +61,29 @@ class UserInput(BaseModel):
             return "medium"
         else:
             return "low"
+    
+    @computed_field
+    @property
+    def city_tier(self) -> int:
+        """Determine city tier based on city name."""
+        if self.city in tier_1_cities:
+            return 1
+        elif self.city in tier_2_cities:
+            return 2
+        else:
+            return 3  
+        
+# Create prediction endpoint
+@app.post("/predict")
+def predict_premium(input_data: UserInput):          
 
+    input_df = pd.DataFrame([{'bmi': input_data.bmi,
+                   'age_group': input_data.age_group,
+                   'lifestyle_risk': input_data.lifestyle_risk,
+                   'city_tier': input_data.city_tier,
+                   'income_lpa': input_data.income_lpa,
+                   'occupation': input_data.occupation}])
+
+    prediction = model.predict(input_df)[0]
+    
+    return JSONResponse(status_code=200, content={'premium_category': prediction})
