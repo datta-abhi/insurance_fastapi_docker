@@ -26,7 +26,7 @@ class UserInput(BaseModel):
     age: Annotated[int, Field(..., ge=0, lt=120, description="Age of the person")]
     weight: Annotated[float, Field(..., ge=0, lt=300, description="weight of the person")]
     height: Annotated[float, Field(..., ge=0, lt=2.5, description="height of the person")]
-    income_lpa: Annotated[float, Field(..., ge=0, description="incomein LPA of the person")]
+    income_lpa: Annotated[float, Field(..., ge=0, description="income in LPA of the person")]
     smoker: Annotated[bool, Field(..., description="If Person is smoker")]
     city: Annotated[str, Field(..., description="City of Residence")]
     occupation: Annotated[Literal['retired', 'freelancer', 'student', 'government_job',
